@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class Client {
     public static void main(String[] args) throws IOException {
@@ -31,48 +32,20 @@ public class Client {
         ) {
             String userInput;
             String serverResponse;
+            String currentString = "";
+            String totalString;
             HashMap<Integer, String> packets = new HashMap<>();
-            String part1, part2, part3;
-            part3 = null;
-            boolean received;
-            boolean part1Gotten = false;
-            int total = 0;
+            int totalInt = 0;
+            int currentInt = 0;
+            HashSet<Integer> missingPackets = new HashSet<>();
+            boolean doneReceived = false;
             while ((userInput = stdIn.readLine()) != null) {
                 requestWriter.println(userInput); // send request to server
                 while((serverResponse = responseReader.readLine()) != null){
-                    for (int i = serverResponse.length() - 1; i <= 0; i++) {
-                        part1Gotten = false;
-                        if (serverResponse.charAt(i) == '-' && !part1Gotten){
-                            part3 = serverResponse.substring(i + 1, serverResponse.length());
-                            part1Gotten = true;
-                            serverResponse = serverResponse.substring(0,i);
-                        }
-                        if (serverResponse.charAt(i) == '-' && part1Gotten){
-                            part2 = serverResponse.substring(i + 1, serverResponse.length());
-                            serverResponse = serverResponse.substring(0,i);
-                            break;
-                        }
+                    if (serverResponse.equals("Done")){
+                        doneReceived = true;
                     }
-                    if (part1Gotten){
-                        packets.put(Integer.parseInt(part2), serverResponse);
-                    }
-                }
-                if (!part1Gotten){
-                    String done = serverResponse;
-                }
-                if (part3 != null){
-                    total = Integer.parseInt(part3);
-                    received = true;
-                } else {
-                    received = false;
-                }
-                ArrayList<Integer> missing = new ArrayList<>();
-                if (received){
-                    for (int i = 0; i < total; i++) {
-                        if (! packets.containsKey(i)) {
-                            missing.add(i);
-                        }
-                    }
+                    processLine(serverResponse, missingPackets, packets);
                 }
                 System.out.println("SERVER RESPONDS: \"" + serverResponse + "\"");
 
@@ -84,6 +57,33 @@ public class Client {
             System.err.println("Couldn't get I/O for the connection to " +
                     hostName);
             System.exit(1);
+        }
+    }
+
+    private static void processLine(String serverResponse, HashSet<Integer> missingPackets, HashMap<Integer, String> packets) {
+        int currentInt;
+        String totalString;
+        String currentString;
+        int totalInt;
+        for (int i = serverResponse.length() - 1; i >= 0; i--) {
+            if (serverResponse.charAt(i) == '-'){
+                totalString = serverResponse.substring(i + 1);
+                serverResponse = serverResponse.substring(0,i);
+                totalInt = Integer.parseInt(totalString);
+                if (missingPackets.isEmpty()){
+                    for (int j = 0; j < totalInt; j++) {
+                        missingPackets.add(j);
+                    }
+                }
+            }
+            if (serverResponse.charAt(i) == '-'){
+                currentString = serverResponse.substring(i + 1);
+                serverResponse = serverResponse.substring(0,i);
+                currentInt = Integer.parseInt(currentString);
+                missingPackets.remove(currentInt);
+                packets.put(currentInt, serverResponse);
+                break;
+            }
         }
     }
 }
