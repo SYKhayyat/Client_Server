@@ -41,13 +41,21 @@ public class Client {
             boolean doneReceived = false;
             while ((userInput = stdIn.readLine()) != null) {
                 requestWriter.println(userInput); // send request to server
-                while((serverResponse = responseReader.readLine()) != null){
-                    if (serverResponse.equals("Done")){
+                while ((serverResponse = responseReader.readLine()) != null) {
+                    if (serverResponse.equals("Done")) {
                         doneReceived = true;
                     }
                     processLine(serverResponse, missingPackets, packets);
                 }
-                System.out.println("SERVER RESPONDS: \"" + serverResponse + "\"");
+                while (!missingPackets.isEmpty()) {
+                    String missing = "";
+                    for (int i : missingPackets) {
+                        missing += i;
+                        missing += ",";
+                    }
+                    requestWriter.println(missing);
+                }
+            System.out.println("SERVER RESPONDS: \"" + serverResponse + "\"");
 
             }
         } catch (UnknownHostException e) {
