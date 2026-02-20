@@ -38,22 +38,46 @@ public class Server {
         ) {
             String usersRequest;
             int sentAmount = 0;
+            System.out.println("a");
             while ((usersRequest = requestReader1.readLine()) != null) {
-                sentAmount = pickSendingNumber(nums);
-                String baseString = messages[sentAmount];
-                String protocol = "/" + sentAmount + "-" + messages.length;
-                String sendingString = baseString + protocol;
-                int ifToSend = r.nextInt(0, 9);
-                    if (ifToSend < 8){
-                        responseWriter1.println(sendingString);
+                if (Character.isDigit(usersRequest.charAt(0))){
+                    String[] missingString = usersRequest.split(" ");
+                    int[] missingInt = new int[missingString.length];
+                    for (int i = 0; i < missingInt.length; i++) {
+                        missingInt[i] = Integer.parseInt(missingString[i]);
                     }
+                    for (int i = 0; i < missingInt.length; i++) {
+                        missingString[i] = messages[missingInt[i]];
+                    }
+                    fillHashSet(nums, missingString);
+                    sendMessages(nums, missingString, responseWriter1);
+                    System.out.printf("b");
+                } else {
+                sendMessages(nums, messages, responseWriter1);
+                    System.out.printf("c");
                 }
                 responseWriter1.println("Done");
-            } catch (IOException e) {
+            }
+        } catch (IOException e) {
                 System.out.println(
                     "Exception caught when trying to listen on port " + portNumber + " or listening for a connection");
                 System.out.println(e.getMessage());
             }
+
+    }
+
+    private static void sendMessages(HashSet<Integer> nums, String[] messages, PrintWriter responseWriter1) {
+        for (int i = 0; i < messages.length; i++) {
+            int sentAmount;
+            sentAmount = pickSendingNumber(nums);
+            String baseString = messages[sentAmount];
+            String protocol = "/" + sentAmount + "-" + messages.length;
+            String sendingString = baseString + protocol;
+            int ifToSend = r.nextInt(0, 9);
+            if (ifToSend < 8){
+                responseWriter1.println(sendingString);
+            }
+        }
 
     }
 
@@ -68,6 +92,7 @@ public class Server {
             i++;
         }
         nums.remove(send);
+        System.out.println("e");
         return send;
     }
 
@@ -75,6 +100,7 @@ public class Server {
         for (int i = 0; i < messages.length; i++) {
             nums.add(i);
         }
+        System.out.println("f");
     }
 
 }

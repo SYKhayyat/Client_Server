@@ -23,7 +23,7 @@ public class Client {
                 Socket clientSocket = new Socket(hostName, portNumber);
                 PrintWriter requestWriter = // stream to write text requests to server
                         new PrintWriter(clientSocket.getOutputStream(), true);
-                BufferedReader responseReader= // stream to read text response from server
+                BufferedReader responseReader = // stream to read text response from server
                         new BufferedReader(
                                 new InputStreamReader(clientSocket.getInputStream()));
                 BufferedReader stdIn = // standard input stream to get user's requests
@@ -32,41 +32,48 @@ public class Client {
         ) {
             String userInput;
             String serverResponse;
-            String currentString = "";
-            String totalString;
             HashMap<Integer, String> packets = new HashMap<>();
-            int totalInt = 0;
-            int currentInt = 0;
             HashSet<Integer> missingPackets = new HashSet<>();
-            boolean doneReceived = false;
-            while ((userInput = stdIn.readLine()) != null) {
-                requestWriter.println(userInput); // send request to server
-                while ((serverResponse = responseReader.readLine()) != null) {
-                    if (serverResponse.equals("Done")) {
-                        doneReceived = true;
+            userInput = stdIn.readLine();
+            while (userInput != null) {
+                requestWriter.println(userInput);// send request to server
+                do {
+                    while ((serverResponse = responseReader.readLine()) != null) {
+                        if (serverResponse.equals("Done")) {
+                            System.out.println("Done");
+                            break;
+                        }
+                        processLine(serverResponse, missingPackets, packets);
+                        System.out.printf(serverResponse);
+                        System.out.println(!missingPackets.isEmpty());
+                        System.out.println("Missing " + missingPackets.size());
+
+
+                    if (!missingPackets.isEmpty()) {
+                        String missing = "";
+                        for (int i : missingPackets) {
+                            missing += i;
+                            missing += " ";
+                        }
+                        requestWriter.println(missing);
+                    } else {
+                        break;
                     }
-                    processLine(serverResponse, missingPackets, packets);
-                }
-                while (!missingPackets.isEmpty()) {
-                    String missing = "";
-                    for (int i : missingPackets) {
-                        missing += i;
-                        missing += ",";
-                    }
-                    requestWriter.println(missing);
-                }
-            System.out.println("SERVER RESPONDS: \"" + serverResponse + "\"");
+                }} while (!missingPackets.isEmpty());
+                System.out.println("Hi!!!!!!!!!");
+                userInput = stdIn.readLine();
 
             }
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host " + hostName);
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to " +
-                    hostName);
-            System.exit(1);
+            } catch(UnknownHostException e){
+                System.err.println("Don't know about host " + hostName);
+                System.exit(1);
+            } catch(IOException e){
+                System.err.println("Couldn't get I/O for the connection to " +
+                        hostName);
+                System.exit(1);
+            }
         }
-    }
+
 
     private static void processLine(String serverResponse, HashSet<Integer> missingPackets, HashMap<Integer, String> packets) {
         int currentInt;
@@ -83,8 +90,9 @@ public class Client {
                         missingPackets.add(j);
                     }
                 }
+                continue;
             }
-            if (serverResponse.charAt(i) == '-'){
+            if (serverResponse.charAt(i) == '/'){
                 currentString = serverResponse.substring(i + 1);
                 serverResponse = serverResponse.substring(0,i);
                 currentInt = Integer.parseInt(currentString);
@@ -92,6 +100,8 @@ public class Client {
                 packets.put(currentInt, serverResponse);
                 break;
             }
+
         }
+
     }
 }
