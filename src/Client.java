@@ -36,19 +36,10 @@ public class Client {
             HashSet<Integer> missingPackets = new HashSet<>();
             userInput = stdIn.readLine();
             while (userInput != null) {
+                userInput += ";";
                 requestWriter.println(userInput);// send request to server
                 do {
-                    while ((serverResponse = responseReader.readLine()) != null) {
-                        if (serverResponse.equals("Done")) {
-                            System.out.println("Done");
-                            break;
-                        }
-                        processLine(serverResponse, missingPackets, packets);
-                        System.out.printf(serverResponse);
-                        System.out.println(!missingPackets.isEmpty());
-                        System.out.println("Missing " + missingPackets.size());
-
-
+                    getServerResponse(responseReader, missingPackets, packets);
                     if (!missingPackets.isEmpty()) {
                         String missing = "";
                         for (int i : missingPackets) {
@@ -59,8 +50,9 @@ public class Client {
                     } else {
                         break;
                     }
-                }} while (!missingPackets.isEmpty());
-                System.out.println("Hi!!!!!!!!!");
+                } while (!missingPackets.isEmpty());
+                String text = processText(packets);
+                System.out.println(text);
                 userInput = stdIn.readLine();
 
             }
@@ -73,6 +65,25 @@ public class Client {
                 System.exit(1);
             }
         }
+
+    private static void getServerResponse(BufferedReader responseReader, HashSet<Integer> missingPackets, HashMap<Integer, String> packets) throws IOException {
+        String serverResponse;
+        while ((serverResponse = responseReader.readLine()) != null) {
+            if (serverResponse.equals("Done")) {
+                break;
+            }
+            processLine(serverResponse, missingPackets, packets);
+
+        }
+    }
+
+    private static String processText(HashMap<Integer, String> packets) {
+        String text = "";
+        for (int i = 0; i < packets.size(); i++) {
+            text += packets.get(i);
+        }
+        return text;
+    }
 
 
     private static void processLine(String serverResponse, HashSet<Integer> missingPackets, HashMap<Integer, String> packets) {
