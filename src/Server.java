@@ -19,7 +19,7 @@ public class Server {
                 "glory, glory, ", "Hallelujah ", "- Battle Hymn ",
                 "of The Republic."
         };
-        HashSet<Integer> nums = new HashSet<>();
+        HashSet<Integer> nums = new HashSet<>(); // To get a random packet.
         fillHashSet(nums, messages);
         // Hard code in port number if necessary:
         //args = new String[] { "30121" };
@@ -39,14 +39,14 @@ public class Server {
             String usersRequest;
             int sentAmount = 0;
             while ((usersRequest = requestReader1.readLine()) != null) {
-                if (usersRequest.charAt(usersRequest.length() - 1) != ';'){
+                if (usersRequest.charAt(usersRequest.length() - 1) != ';'){ // This means it is a request to resend packets.
                     System.out.println(usersRequest);
-                    String[] missingString = usersRequest.split(" ");
+                    String[] missingString = usersRequest.split(" "); // Make an array of needed packets.
                     HashSet<Integer> missingInt = new HashSet<>();
                     for (int i = 0; i < missingString.length; i++) {
-                        missingInt.add(Integer.parseInt(missingString[i]));
+                        missingInt.add(Integer.parseInt(missingString[i])); // Make it an int array.
                     }
-                    sendMessages(missingInt, messages, responseWriter1, missingString);
+                    sendMessages(missingInt, messages, responseWriter1, missingString); // Send only those missing.
                 } else {
                     sendMessages(nums, messages, responseWriter1, messages);
                 }
@@ -64,11 +64,11 @@ public class Server {
             int sentAmount;
             sentAmount = pickSendingNumber(numbers);
             String baseString = messages[sentAmount];
-            String protocol = "/" + sentAmount + "-" + messages.length;
+            String protocol = "/" + sentAmount + "-" + messages.length; // This will send the current and total numbers.
             String sendingString = baseString + protocol;
             int ifToSend = r.nextInt(0, 9);
             if (ifToSend < 8){
-                responseWriter1.println(sendingString);
+                responseWriter1.println(sendingString); // Send with an 80% chance.
             }
         }
     }
@@ -80,7 +80,7 @@ public class Server {
         sendIndex = r.nextInt(0, numbers.size());
         for (int element : numbers) {
             if (i == sendIndex) {
-                send =  element;
+                send =  element; // Pick a random element of the message.
             }
             i++;
         }
